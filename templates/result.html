@@ -19,16 +19,24 @@
         </header>
 
         <section class="panel">
+
             <div class="results-header-row">
                 <div class="results-title">API Security Overview</div>
-                <div>
+
+                {% if report.status_code is number %}
                     <span class="status-badge status-{{ 'safe' if report.status_code < 400 else 'vulnerable' }}">
                         {{ 'Healthy' if report.status_code < 400 else 'Attention needed' }}
                     </span>
-                </div>
+                {% else %}
+                    <span class="status-badge status-vulnerable">
+                        Scan Result
+                    </span>
+                {% endif %}
+
             </div>
 
             <div class="results-grid">
+
                 <div class="results-section">
                     <h3>Endpoint & Status</h3>
                     <p><strong>URL:</strong> {{ report.api_url }}</p>
@@ -66,15 +74,45 @@
                     <p>{{ report.rate_limit_issue }}</p>
                 </div>
                 {% endif %}
+
+                {% if report.allowed_methods %}
+                <div class="results-section">
+                    <h3>Allowed HTTP Methods</h3>
+                    <ul>
+                        {% for method in report.allowed_methods %}
+                        <li>{{ method }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if report.response_time_ms %}
+                <div class="results-section">
+                    <h3>Response Time</h3>
+                    <p>{{ report.response_time_ms }} ms</p>
+                </div>
+                {% endif %}
+
             </div>
+
+            <div style="margin-top:20px;">
+                <a href="/download-report" class="btn">
+                    Download PDF Report
+                </a>
+            </div>
+
         </section>
     </main>
 
+
     <aside class="chat-panel">
+
         <div class="chat-header">
             <div class="chat-header-main">
                 <div class="chat-title">Security Assistant</div>
-                <div class="chat-subtitle">Discuss this scan’s findings and mitigations.</div>
+                <div class="chat-subtitle">
+                    Discuss this scan’s findings and mitigations.
+                </div>
             </div>
             <div class="chat-pill">Online</div>
         </div>
@@ -82,24 +120,30 @@
         <div class="chat-messages" id="chatMessages">
             <div class="message-row bot">
                 <div class="message-bubble">
-                    Scan complete. Ask me to explain any header issue, authentication problem, or rate‑limit finding in this report.
+                    Scan complete. Ask me to explain any header issue,
+                    authentication problem, or rate-limit finding in this report.
                 </div>
             </div>
         </div>
 
         <div class="chat-input-bar">
-            <input type="text"
-                   id="message"
-                   class="chat-input-field"
-                   placeholder="Ask about this scan..."
-                   onkeypress="handleKeyPress(event)">
+            <input
+                type="text"
+                id="message"
+                class="chat-input-field"
+                placeholder="Ask about this scan..."
+                onkeypress="handleKeyPress(event)"
+            >
             <button class="chat-send-btn" onclick="sendMessage()">
                 &#10148;
             </button>
         </div>
+
     </aside>
 
 </div>
+
 <script src="/static/js/chatbot.js"></script>
+
 </body>
 </html>
