@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan Result</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<h1>API Security Report</h1>
+
+<p><strong>API URL:</strong> {{ report.api_url }}</p>
+
+<p><strong>Status:</strong> {{ report.status_code }}</p>
+
+<h3>Header Issues</h3>
+<ul>
+{% for issue in report.header_issues %}
+<li>{{ issue }}</li>
+{% endfor %}
+</ul>
+
+<p><strong>Authentication:</strong> {{ report.authentication_issue }}</p>
+
+<p><strong>Rate Limit:</strong> {{ report.rate_limit_issue }}</p>
+
+<p><strong>Server Info:</strong> {{ report.server_information }}</p>
+
+<hr>
+
+<h2>Chat with Security Assistant</h2>
+
+<input type="text" id="message" placeholder="Ask about vulnerabilities">
+<button onclick="sendMessage()">Ask</button>
+
+<p id="chat-response"></p>
+
+<script src="/static/js/chatbot.js"></script>
+
+<br><br>
+
+<a href="/">Scan Another API</a>
+
+</body>
+</html>
