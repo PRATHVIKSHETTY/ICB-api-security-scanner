@@ -1,5 +1,6 @@
 let chatHistory = [];
 
+/* ---------- Render Message ---------- */
 function appendMessage(text, from) {
 
     const messages = document.getElementById('chatMessages');
@@ -13,7 +14,12 @@ function appendMessage(text, from) {
 
     if (!text) text = "No response from assistant.";
 
-    bubble.innerHTML = String(text).replace(/\n/g, "<br>");
+    // Render Markdown if available
+    if (window.marked) {
+        bubble.innerHTML = marked.parse(text);
+    } else {
+        bubble.innerHTML = String(text).replace(/\n/g, "<br>");
+    }
 
     row.appendChild(bubble);
     messages.appendChild(row);
@@ -21,6 +27,35 @@ function appendMessage(text, from) {
     messages.scrollTop = messages.scrollHeight;
 }
 
+
+/* ---------- Typing Indicator ---------- */
+function showTyping() {
+
+    const messages = document.getElementById('chatMessages');
+
+    const row = document.createElement('div');
+    row.className = 'message-row bot';
+    row.id = "typing-indicator";
+
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.innerText = "Assistant is typing...";
+
+    row.appendChild(bubble);
+    messages.appendChild(row);
+
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function removeTyping() {
+
+    const typing = document.getElementById("typing-indicator");
+    if (typing) typing.remove();
+
+}
+
+
+/* ---------- Send Message ---------- */
 function sendMessage() {
 
     const input = document.getElementById('message');
@@ -31,7 +66,6 @@ function sendMessage() {
 
     appendMessage(message, 'user');
 
-    // store user message
     chatHistory.push({
         role: "user",
         content: message
@@ -39,8 +73,7 @@ function sendMessage() {
 
     input.value = '';
 
-    // typing indicator
-    appendMessage("Assistant is typing...", "bot");
+    showTyping();
 
     fetch('/chat', {
         method: 'POST',
@@ -55,18 +88,12 @@ function sendMessage() {
     .then(res => res.json())
     .then(data => {
 
-        const messages = document.getElementById('chatMessages');
-
-        // remove typing indicator
-        if (messages.lastChild) {
-            messages.removeChild(messages.lastChild);
-        }
+        removeTyping();
 
         const reply = data.reply || "Sorry, I couldn't understand that.";
 
         appendMessage(reply, 'bot');
 
-        // store assistant reply
         chatHistory.push({
             role: "assistant",
             content: reply
@@ -75,22 +102,21 @@ function sendMessage() {
     })
     .catch(() => {
 
-        const messages = document.getElementById('chatMessages');
-
-        if (messages.lastChild) {
-            messages.removeChild(messages.lastChild);
-        }
+        removeTyping();
 
         appendMessage(
-            "Sorry, something went wrong while contacting the assistant.",
+            "⚠️ Unable to contact the AI assistant. Please try again.",
             'bot'
         );
+
     });
 }
 
+
+/* ---------- Enter Key Support ---------- */
 function handleKeyPress(event) {
 
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
 
         event.preventDefault();
         sendMessage();
