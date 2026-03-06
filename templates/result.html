@@ -1,44 +1,105 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Scan Result</title>
+    <title>Scan Result - API Security Scanner</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+<div class="page-layout">
 
-<h1>API Security Report</h1>
+    <main class="main-content">
+        <header class="app-header">
+            <div>
+                <div class="app-title">Scan Result</div>
+                <div class="results-meta">
+                    API: {{ report.api_url }} &nbsp;•&nbsp; Status: {{ report.status_code }}
+                </div>
+            </div>
+            <a href="/" class="btn">New Scan</a>
+        </header>
 
-<p><strong>API URL:</strong> {{ report.api_url }}</p>
+        <section class="panel">
+            <div class="results-header-row">
+                <div class="results-title">API Security Overview</div>
+                <div>
+                    <span class="status-badge status-{{ 'safe' if report.status_code < 400 else 'vulnerable' }}">
+                        {{ 'Healthy' if report.status_code < 400 else 'Attention needed' }}
+                    </span>
+                </div>
+            </div>
 
-<p><strong>Status:</strong> {{ report.status_code }}</p>
+            <div class="results-grid">
+                <div class="results-section">
+                    <h3>Endpoint & Status</h3>
+                    <p><strong>URL:</strong> {{ report.api_url }}</p>
+                    <p><strong>Status code:</strong> {{ report.status_code }}</p>
+                </div>
 
-<h3>Header Issues</h3>
-<ul>
-{% for issue in report.header_issues %}
-<li>{{ issue }}</li>
-{% endfor %}
-</ul>
+                {% if report.server_information %}
+                <div class="results-section">
+                    <h3>Server Information</h3>
+                    <p>{{ report.server_information }}</p>
+                </div>
+                {% endif %}
 
-<p><strong>Authentication:</strong> {{ report.authentication_issue }}</p>
+                {% if report.header_issues %}
+                <div class="results-section">
+                    <h3>Header Issues</h3>
+                    <ul>
+                        {% for issue in report.header_issues %}
+                        <li>{{ issue }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
 
-<p><strong>Rate Limit:</strong> {{ report.rate_limit_issue }}</p>
+                {% if report.authentication_issue %}
+                <div class="results-section">
+                    <h3>Authentication</h3>
+                    <p>{{ report.authentication_issue }}</p>
+                </div>
+                {% endif %}
 
-<p><strong>Server Info:</strong> {{ report.server_information }}</p>
+                {% if report.rate_limit_issue %}
+                <div class="results-section">
+                    <h3>Rate Limiting</h3>
+                    <p>{{ report.rate_limit_issue }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
 
-<hr>
+    <aside class="chat-panel">
+        <div class="chat-header">
+            <div class="chat-header-main">
+                <div class="chat-title">Security Assistant</div>
+                <div class="chat-subtitle">Discuss this scan’s findings and mitigations.</div>
+            </div>
+            <div class="chat-pill">Online</div>
+        </div>
 
-<h2>Chat with Security Assistant</h2>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message-row bot">
+                <div class="message-bubble">
+                    Scan complete. Ask me to explain any header issue, authentication problem, or rate‑limit finding in this report.
+                </div>
+            </div>
+        </div>
 
-<input type="text" id="message" placeholder="Ask about vulnerabilities">
-<button onclick="sendMessage()">Ask</button>
+        <div class="chat-input-bar">
+            <input type="text"
+                   id="message"
+                   class="chat-input-field"
+                   placeholder="Ask about this scan..."
+                   onkeypress="handleKeyPress(event)">
+            <button class="chat-send-btn" onclick="sendMessage()">
+                &#10148;
+            </button>
+        </div>
+    </aside>
 
-<p id="chat-response"></p>
-
+</div>
 <script src="/static/js/chatbot.js"></script>
-
-<br><br>
-
-<a href="/">Scan Another API</a>
-
 </body>
 </html>

@@ -1,26 +1,46 @@
+function appendMessage(text, from) {
+    const messages = document.getElementById('chatMessages');
+    if (!messages) return;
+
+    const row = document.createElement('div');
+    row.className = 'message-row ' + (from === 'user' ? 'user' : 'bot');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.textContent = text;
+
+    row.appendChild(bubble);
+    messages.appendChild(row);
+    messages.scrollTop = messages.scrollHeight;
+}
+
 function sendMessage() {
+    const input = document.getElementById('message');
+    if (!input) return;
 
-    const message = document.getElementById("message").value;
+    const message = input.value.trim();
+    if (!message) return;
 
-    if (!message) {
-        return;
-    }
+    appendMessage(message, 'user');
+    input.value = '';
 
-    fetch("/chat", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            message: message
-        })
+    fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
-        document.getElementById("chat-response").innerText = data.reply;
+        appendMessage(data.reply || 'No response from assistant.', 'bot');
     })
-    .catch(error => {
-        document.getElementById("chat-response").innerText = "Chatbot error.";
+    .catch(() => {
+        appendMessage('Sorry, something went wrong while contacting the assistant.', 'bot');
     });
+}
 
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        sendMessage();
+    }
 }
