@@ -37,36 +37,3 @@ Other Tools
 Git
 GitHub
 VS Code
-
-Project Structure
-api-security-scanner/
-│
-├── app.py
-├── config.py
-├── requirements.txt
-├── README.md
-│
-├── scanner/
-│   ├── __init__.py
-│   ├── api_scanner.py
-│   └── checks.py
-│
-├── chatbot/
-│   ├── __init__.py
-│   └── chatbot.py
-│
-├── templates/
-│   ├── index.html
-│   ├── result.html
-│   └── chatbot.html
-│
-├── static/
-│   ├── css/style.css
-│   ├── js/chatbot.js
-│   └── images/
-│
-├── reports/
-│   └── sample_report.json
-│
-└── docs/
-    └── architecture.md
