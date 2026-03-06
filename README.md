@@ -9,8 +9,7 @@ The system allows users to enter an API endpoint URL, after which the scanner an
 
 Additionally, a chatbot interface explains the detected vulnerabilities and provides recommendations for improving API security.
 
-Features
-
+Features:
 Scan API endpoints for basic security vulnerabilities
 Detect issues such as:
   Missing authentication
