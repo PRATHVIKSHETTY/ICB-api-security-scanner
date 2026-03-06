@@ -44,12 +44,11 @@ def discover_methods(url):
     """Check allowed HTTP methods"""
 
     methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
-
     allowed = []
 
     for method in methods:
-        try:
 
+        try:
             r = requests.request(
                 method,
                 url,
@@ -61,7 +60,7 @@ def discover_methods(url):
                 allowed.append(method)
 
         except requests.exceptions.RequestException:
-            pass
+            continue
 
     return allowed
 
@@ -72,13 +71,14 @@ def scan_api(input_text):
 
     report = {
         "api_url": url,
-        "status_code": None,
-        "response_time_ms": None,
+        "status_code": 0,
+        "status_message": "",
+        "response_time_ms": 0,
         "allowed_methods": [],
         "header_issues": [],
-        "authentication_issue": None,
-        "rate_limit_issue": None,
-        "server_information": None
+        "authentication_issue": "",
+        "rate_limit_issue": "",
+        "server_information": ""
     }
 
     try:
@@ -96,42 +96,47 @@ def scan_api(input_text):
 
         report["response_time_ms"] = round((end - start) * 1000, 2)
 
-        # Status check
-        report["status_code"] = check_status_code(response)
+        # numeric status
+        report["status_code"] = response.status_code
 
-        # Header security check
+        # human readable message
+        report["status_message"] = check_status_code(response)
+
+        # header checks
         report["header_issues"] = check_headers(response)
 
-        # Authentication check
+        # authentication test
         report["authentication_issue"] = check_authentication(
             url, DEFAULT_HEADERS
         )
 
-        # Rate limit check
+        # rate limit test
         report["rate_limit_issue"] = check_rate_limit(
             url, DEFAULT_HEADERS
         )
 
-        # Server info
+        # server info
         report["server_information"] = check_server_info(response)
 
-        # HTTP method discovery
+        # method discovery
         report["allowed_methods"] = discover_methods(url)
 
-        return report
+    except requests.exceptions.Timeout:
+
+        report["status_message"] = "Connection timed out"
+        report["server_information"] = "Timeout while connecting"
+
+    except requests.exceptions.ConnectionError:
+
+        report["status_message"] = "Connection failed"
+        report["server_information"] = "Could not reach API server"
 
     except requests.exceptions.RequestException as e:
 
-        return {
-            "api_url": url,
-            "status_code": "Scan failed",
-            "response_time_ms": None,
-            "allowed_methods": [],
-            "header_issues": [],
-            "authentication_issue": "Scan failed",
-            "rate_limit_issue": "Scan failed",
-            "server_information": str(e)
-        }
+        report["status_message"] = "Scan error"
+        report["server_information"] = str(e)
+
+    return report
 
 
 def save_report(report):

@@ -7,6 +7,7 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# store latest scan result
 last_scan_report = None
 
 
@@ -15,6 +16,7 @@ def home():
     return render_template("index.html")
 
 
+# Scan API endpoint
 @app.route("/scan", methods=["POST"])
 def scan():
 
@@ -31,6 +33,7 @@ def scan():
 
         save_report(report)
 
+        # store report for chatbot and PDF
         last_scan_report = report
 
         return render_template("result.html", report=report)
@@ -39,26 +42,48 @@ def scan():
         return render_template("index.html", error=str(e))
 
 
+# Chatbot endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
 
+    global last_scan_report
+
     data = request.get_json()
 
-    if not data or "message" not in data:
+    if not data:
         return jsonify({"reply": "Please enter a message."})
 
-    user_message = data["message"]
+    user_message = data.get("message")
+    history = data.get("history", [])
 
-    response = get_chatbot_response(user_message)
+    if not user_message:
+        return jsonify({"reply": "Please enter a message."})
 
-    return jsonify({"reply": response})
+    try:
+        # send scan report + chat history to chatbot
+        response = get_chatbot_response(
+            user_message,
+            history=history,
+            scan_report=last_scan_report
+        )
+
+        return jsonify({"reply": response})
+
+    except Exception as e:
+        print("Chat error:", e)
+
+        return jsonify({
+            "reply": "Assistant failed to respond."
+        })
 
 
+# Optional chatbot page
 @app.route("/chatbot")
 def chatbot_page():
     return render_template("chatbot.html")
 
 
+# Download PDF report
 @app.route("/download-report")
 def download_report():
 
