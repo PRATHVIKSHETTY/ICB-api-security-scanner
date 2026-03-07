@@ -1,86 +1,218 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-    <title>API Security Scanner</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+<title>API Security Scanner Dashboard</title>
+<link rel="stylesheet" href="/static/css/style.css" />
 </head>
+
 <body>
+
 <div class="page-layout">
 
-    <!-- Left: main scanner area -->
-    <main class="main-content">
-        <div class="main-inner">
-            <header class="app-header">
-                <div>
-                    <div class="app-title">API Security Scanner</div>
-                    <div class="app-subtitle">
-                        Scan REST endpoints for common misconfigurations and weak controls.
-                    </div>
-                </div>
-            </header>
+<!-- LEFT SIDE -->
+<main class="main-content">
 
-            <section class="panel scan-form">
-                <form action="/scan" method="POST">
-                    <label for="api_url" class="form-label">API Endpoint</label>
-                    <div class="input-row">
-                        <input
-                            type="text"
-                            id="api_url"
-                            name="api_url"
-                            placeholder="https://api.example.com/v1/resource"
-                            required
-                        >
-                        <button type="submit" class="btn">
-                            <span>Scan</span>
-                        </button>
-                    </div>
-                </form>
+<div class="main-inner">
 
-                {% if error %}
-                <div class="error">
-                    {{ error }}
-                </div>
-                {% endif %}
-            </section>
-        </div>
-    </main>
+<header class="app-header">
+<div>
+<div class="app-title">API Security Scanner</div>
 
-    <!-- Right: full-height chat panel -->
-    <aside class="chat-panel">
-        <div class="chat-header">
-            <div class="chat-header-main">
-                <div class="chat-title">Security Assistant</div>
-                <div class="chat-subtitle">
-                    Ask about vulnerabilities, headers, auth, rate limiting.
-                </div>
-            </div>
-            <div class="chat-pill">Online</div>
-        </div>
-
-        <div class="chat-messages" id="chatMessages">
-            <div class="message-row bot">
-                <div class="message-bubble">
-                    Hey, I can help you understand API security issues. Start by asking
-                    something like “What does missing rate limiting mean?”.
-                </div>
-            </div>
-        </div>
-
-        <div class="chat-input-bar">
-            <input
-                type="text"
-                id="message"
-                class="chat-input-field"
-                placeholder="Ask about API security..."
-                onkeypress="handleKeyPress(event)"
-            >
-            <button class="chat-send-btn" onclick="sendMessage()">
-                &#10148;
-            </button>
-        </div>
-    </aside>
+<div class="app-subtitle">
+Analyze API endpoints for authentication issues, insecure headers,
+rate limiting problems, and exposed server data.
+</div>
 
 </div>
+</header>
+
+
+<!-- DASHBOARD STATS -->
+
+<div class="dashboard-stats">
+
+<div class="stat-card">
+<h3>Total Scans</h3>
+<p>{{ stats.total_scans }}</p>
+</div>
+
+<div class="stat-card">
+<h3>Vulnerabilities</h3>
+<p>{{ stats.vulnerabilities }}</p>
+</div>
+
+<div class="stat-card">
+<h3>Secure APIs</h3>
+<p>{{ stats.secure }}</p>
+</div>
+
+</div>
+
+
+<!-- SCAN API -->
+
+<section class="panel scan-form">
+
+<form action="/scan" method="POST">
+
+<label for="api_url" class="form-label">Scan API Endpoint</label>
+
+<div class="input-row">
+
+<input
+type="text"
+id="api_url"
+name="api_url"
+placeholder="https://api.example.com/v1/resource"
+required
+/>
+
+<button type="submit" class="btn">
+<span>Scan</span>
+</button>
+
+</div>
+
+</form>
+
+{% if error %}
+<div class="error">
+{{ error }}
+</div>
+{% endif %}
+
+</section>
+
+
+<!-- RECENT SCANS -->
+
+<section class="panel recent-scans">
+
+<h3>Recent Scans</h3>
+
+<table class="scan-table">
+
+<thead>
+<tr>
+<th>API Endpoint</th>
+<th>Status</th>
+<th>Issues</th>
+<th>Risk</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% if recent_scans %}
+
+{% for scan in recent_scans %}
+
+<tr>
+
+<td>{{ scan.url }}</td>
+
+<td>{{ scan.status }}</td>
+
+<td>{{ scan.issues }}</td>
+
+<td class="
+{% if scan.risk == 'High' %}
+risk-high
+{% elif scan.risk == 'Medium' %}
+risk-medium
+{% else %}
+risk-low
+{% endif %}
+">
+
+{{ scan.risk }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+{% else %}
+
+<tr>
+<td colspan="4" style="text-align:center;">
+No scans yet
+</td>
+</tr>
+
+{% endif %}
+
+</tbody>
+
+</table>
+
+</section>
+
+</div>
+
+</main>
+
+
+<!-- RIGHT SIDE CHAT -->
+
+<aside class="chat-panel">
+
+<div class="chat-header">
+
+<div class="chat-header-main">
+
+<div class="chat-title">Security Assistant</div>
+
+<div class="chat-subtitle">
+Ask about vulnerabilities, headers, authentication, and rate limiting.
+</div>
+
+</div>
+
+<div class="chat-pill">Online</div>
+
+</div>
+
+
+<div class="chat-messages" id="chatMessages">
+
+<div class="message-row bot">
+<div class="message-bubble">
+
+Hey! I can explain API security findings and mitigation steps.
+
+Try asking:
+
+“What does missing rate limiting mean?”
+
+</div>
+</div>
+
+</div>
+
+
+<div class="chat-input-bar">
+
+<input
+type="text"
+id="message"
+class="chat-input-field"
+placeholder="Ask about API security..."
+onkeypress="handleKeyPress(event)"
+/>
+
+<button class="chat-send-btn" onclick="sendMessage()">
+&#10148;
+</button>
+
+</div>
+
+</aside>
+
+</div>
+
 <script src="/static/js/chatbot.js"></script>
+
 </body>
 </html>

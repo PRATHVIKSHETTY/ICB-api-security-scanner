@@ -1,21 +1,22 @@
 let chatHistory = [];
 
+
 /* ---------- Render Message ---------- */
 function appendMessage(text, from) {
 
-    const messages = document.getElementById('chatMessages');
+    const messages = document.getElementById("chatMessages");
     if (!messages) return;
 
-    const row = document.createElement('div');
-    row.className = 'message-row ' + (from === 'user' ? 'user' : 'bot');
+    const row = document.createElement("div");
+    row.className = "message-row " + (from === "user" ? "user" : "bot");
 
-    const bubble = document.createElement('div');
-    bubble.className = 'message-bubble';
+    const bubble = document.createElement("div");
+    bubble.className = "message-bubble";
 
     if (!text) text = "No response from assistant.";
 
-    // Render Markdown if available
-    if (window.marked) {
+    // Markdown rendering if library exists
+    if (typeof marked !== "undefined") {
         bubble.innerHTML = marked.parse(text);
     } else {
         bubble.innerHTML = String(text).replace(/\n/g, "<br>");
@@ -31,14 +32,15 @@ function appendMessage(text, from) {
 /* ---------- Typing Indicator ---------- */
 function showTyping() {
 
-    const messages = document.getElementById('chatMessages');
+    const messages = document.getElementById("chatMessages");
+    if (!messages) return;
 
-    const row = document.createElement('div');
-    row.className = 'message-row bot';
+    const row = document.createElement("div");
+    row.className = "message-row bot";
     row.id = "typing-indicator";
 
-    const bubble = document.createElement('div');
-    bubble.className = 'message-bubble';
+    const bubble = document.createElement("div");
+    bubble.className = "message-bubble";
     bubble.innerText = "Assistant is typing...";
 
     row.appendChild(bubble);
@@ -46,6 +48,7 @@ function showTyping() {
 
     messages.scrollTop = messages.scrollHeight;
 }
+
 
 function removeTyping() {
 
@@ -58,27 +61,27 @@ function removeTyping() {
 /* ---------- Send Message ---------- */
 function sendMessage() {
 
-    const input = document.getElementById('message');
+    const input = document.getElementById("message");
     if (!input) return;
 
     const message = input.value.trim();
     if (!message) return;
 
-    appendMessage(message, 'user');
+    appendMessage(message, "user");
 
     chatHistory.push({
         role: "user",
         content: message
     });
 
-    input.value = '';
+    input.value = "";
 
     showTyping();
 
-    fetch('/chat', {
-        method: 'POST',
+    fetch("/chat", {
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
             message: message,
@@ -92,7 +95,7 @@ function sendMessage() {
 
         const reply = data.reply || "Sorry, I couldn't understand that.";
 
-        appendMessage(reply, 'bot');
+        appendMessage(reply, "bot");
 
         chatHistory.push({
             role: "assistant",
@@ -106,7 +109,7 @@ function sendMessage() {
 
         appendMessage(
             "⚠️ Unable to contact the AI assistant. Please try again.",
-            'bot'
+            "bot"
         );
 
     });
@@ -122,4 +125,15 @@ function handleKeyPress(event) {
         sendMessage();
 
     }
+}
+
+/* ---------- Toggle Chat Panel ---------- */
+function toggleChat() {
+
+    const panel = document.getElementById("chatPanel");
+    const layout = document.querySelector(".page-layout");
+
+    panel.classList.toggle("open");
+    layout.classList.toggle("chat-open");
+
 }

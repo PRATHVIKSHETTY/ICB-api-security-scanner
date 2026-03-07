@@ -1,206 +1,253 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Scan Result - API Security Scanner</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+<title>Scan Result - API Security Scanner</title>
+<link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
 
-<div class="page-layout">
+<div class="page-layout" id="pageLayout">
 
-    <main class="main-content">
+<main class="main-content">
 
-        <header class="app-header">
-            <div>
-                <div class="app-title">Scan Result</div>
+<!-- HEADER -->
+<header class="result-header">
 
-                <div class="results-meta">
-                    API: {{ report.api_url }}
-                    &nbsp;•&nbsp;
-                    Status: {{ report.status_code }} ({{ report.status_message }})
-                </div>
-            </div>
+<div class="result-title-section">
 
-            <a href="/" class="btn">New Scan</a>
-        </header>
+<h1>Scan Result</h1>
 
+<p class="result-meta">
+API: {{ report.api_url }}
+&nbsp;•&nbsp;
+Status: {{ report.status_code }} ({{ report.status_message }})
+</p>
 
-        <section class="panel">
+</div>
 
-            <div class="results-header-row">
+<div class="result-buttons">
 
-                <div class="results-title">API Security Overview</div>
+<a href="/" class="btn">New Scan</a>
 
-                {% if report.status_code and report.status_code < 400 %}
-                    <span class="status-badge status-safe">
-                        Healthy
-                    </span>
-                {% elif report.status_code and report.status_code >= 400 %}
-                    <span class="status-badge status-vulnerable">
-                        Attention needed
-                    </span>
-                {% else %}
-                    <span class="status-badge status-vulnerable">
-                        Scan Error
-                    </span>
-                {% endif %}
+<a href="/download-report" class="btn">
+Download PDF Report
+</a>
 
-            </div>
+</div>
+
+</header>
 
 
-            <div class="results-grid">
+<!-- SECURITY SCORE -->
+<div class="security-score-card">
 
-                <!-- Endpoint -->
-                <div class="results-section">
-                    <h3>Endpoint & Status</h3>
+<div class="score-title">
+Security Score
+</div>
 
-                    <p><strong>URL:</strong> {{ report.api_url }}</p>
+<div class="score-value">
+{{ report.security_score }} / 100
+</div>
 
-                    <p>
-                        <strong>Status:</strong>
-                        {{ report.status_code }} ({{ report.status_message }})
-                    </p>
-                </div>
-
-
-                <!-- Server info -->
-                {% if report.server_information %}
-                <div class="results-section">
-                    <h3>Server Information</h3>
-                    <p>{{ report.server_information }}</p>
-                </div>
-                {% endif %}
-
-
-                <!-- Header issues -->
-                {% if report.header_issues %}
-                <div class="results-section">
-                    <h3>Header Issues</h3>
-
-                    <ul>
-                        {% for issue in report.header_issues %}
-                        <li>{{ issue }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-
-
-                <!-- Authentication -->
-                {% if report.authentication_issue %}
-                <div class="results-section">
-                    <h3>Authentication</h3>
-                    <p>{{ report.authentication_issue }}</p>
-                </div>
-                {% endif %}
-
-
-                <!-- Rate limiting -->
-                {% if report.rate_limit_issue %}
-                <div class="results-section">
-                    <h3>Rate Limiting</h3>
-                    <p>{{ report.rate_limit_issue }}</p>
-                </div>
-                {% endif %}
-
-
-                <!-- HTTP methods -->
-                {% if report.allowed_methods %}
-                <div class="results-section">
-                    <h3>Allowed HTTP Methods</h3>
-
-                    <ul>
-                        {% for method in report.allowed_methods %}
-                        <li>{{ method }}</li>
-                        {% endfor %}
-                    </ul>
-
-                </div>
-                {% endif %}
-
-
-                <!-- Response time -->
-                {% if report.response_time_ms %}
-                <div class="results-section">
-                    <h3>Response Time</h3>
-                    <p>{{ report.response_time_ms }} ms</p>
-                </div>
-                {% endif %}
-
-
-            </div>
-
-
-            <!-- PDF Download -->
-            <div style="margin-top:20px;">
-
-                <a href="/download-report" class="btn">
-                    Download PDF Report
-                </a>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- Chat Assistant -->
-    <aside class="chat-panel">
-
-        <div class="chat-header">
-
-            <div class="chat-header-main">
-                <div class="chat-title">Security Assistant</div>
-
-                <div class="chat-subtitle">
-                    Discuss this scan’s findings and mitigations.
-                </div>
-            </div>
-
-            <div class="chat-pill">Online</div>
-
-        </div>
-
-
-        <div class="chat-messages" id="chatMessages">
-
-            <div class="message-row bot">
-
-                <div class="message-bubble">
-                    Scan complete. Ask me to explain any header issue,
-                    authentication problem, or rate-limit finding in this report.
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="chat-input-bar">
-
-            <input
-                type="text"
-                id="message"
-                class="chat-input-field"
-                placeholder="Ask about this scan..."
-                onkeypress="handleKeyPress(event)"
-            >
-
-            <button class="chat-send-btn" onclick="sendMessage()">
-                &#10148;
-            </button>
-
-        </div>
-
-    </aside>
-
+<div class="score-desc">
+Calculated based on authentication, headers, rate limiting and response behavior.
+</div>
 
 </div>
 
 
+<!-- SECURITY REPORT -->
+<section class="panel report-panel">
+
+<div class="results-header-row">
+
+<div class="results-title">
+API Security Overview
+</div>
+
+{% if report.status_code and report.status_code < 400 %}
+<span class="status-badge status-safe">Healthy</span>
+
+{% elif report.status_code and report.status_code >= 400 %}
+<span class="status-badge status-vulnerable">Attention needed</span>
+
+{% else %}
+<span class="status-badge status-vulnerable">Scan Error</span>
+{% endif %}
+
+</div>
+
+
+<div class="results-grid">
+
+<!-- Endpoint -->
+<div class="results-section">
+<h3>Endpoint & Status</h3>
+
+<p><strong>URL:</strong> {{ report.api_url }}</p>
+
+<p>
+<strong>Status:</strong>
+{{ report.status_code }} ({{ report.status_message }})
+</p>
+</div>
+
+
+<!-- Server -->
+{% if report.server_information %}
+<div class="results-section">
+<h3>Server Information</h3>
+<p>{{ report.server_information }}</p>
+</div>
+{% endif %}
+
+
+<!-- Headers -->
+{% if report.header_issues %}
+<div class="results-section">
+
+<h3>Header Issues</h3>
+
+<ul>
+{% for issue in report.header_issues %}
+<li>{{ issue }}</li>
+{% endfor %}
+</ul>
+
+</div>
+{% endif %}
+
+
+<!-- Authentication -->
+{% if report.authentication_issue %}
+<div class="results-section">
+
+<h3>Authentication</h3>
+<p>{{ report.authentication_issue }}</p>
+
+</div>
+{% endif %}
+
+
+<!-- Rate limiting -->
+{% if report.rate_limit_issue %}
+<div class="results-section">
+
+<h3>Rate Limiting</h3>
+<p>{{ report.rate_limit_issue }}</p>
+
+</div>
+{% endif %}
+
+
+<!-- Methods -->
+{% if report.allowed_methods %}
+<div class="results-section">
+
+<h3>Allowed HTTP Methods</h3>
+
+<ul>
+{% for method in report.allowed_methods %}
+<li>{{ method }}</li>
+{% endfor %}
+</ul>
+
+</div>
+{% endif %}
+
+
+<!-- Response -->
+{% if report.response_time_ms %}
+<div class="results-section">
+
+<h3>Response Time</h3>
+<p>{{ report.response_time_ms }} ms</p>
+
+</div>
+{% endif %}
+
+</div>
+
+</section>
+
+</main>
+
+
+<!-- CHAT PANEL -->
+<aside class="chat-panel" id="chatPanel">
+
+<div class="chat-header">
+
+<div class="chat-header-main">
+
+<div class="chat-title">Security Assistant</div>
+
+<div class="chat-subtitle">
+Discuss this scan’s findings and mitigations.
+</div>
+
+</div>
+
+<button class="chat-close-btn" onclick="toggleChat()">✕</button>
+
+</div>
+
+
+<div class="chat-messages" id="chatMessages">
+
+<div class="message-row bot">
+<div class="message-bubble">
+
+Scan complete. Ask me to explain any header issue,
+authentication problem, or rate-limit finding in this report.
+
+</div>
+</div>
+
+</div>
+
+
+<div class="chat-input-bar">
+
+<input
+type="text"
+id="message"
+class="chat-input-field"
+placeholder="Ask about this scan..."
+onkeypress="handleKeyPress(event)"
+>
+
+<button class="chat-send-btn" onclick="sendMessage()">
+&#10148;
+</button>
+
+</div>
+
+</aside>
+
+
+<!-- FLOATING BUTTON -->
+<button class="chat-toggle-btn" onclick="toggleChat()">
+💬
+</button>
+
+
 <script src="/static/js/chatbot.js"></script>
+
+<script>
+
+function toggleChat(){
+
+const panel = document.getElementById("chatPanel");
+const layout = document.getElementById("pageLayout");
+
+panel.classList.toggle("open");
+layout.classList.toggle("chat-open");
+
+}
+
+</script>
 
 </body>
 </html>

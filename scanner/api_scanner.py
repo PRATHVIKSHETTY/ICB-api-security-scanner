@@ -12,7 +12,7 @@ from scanner.checks import (
     check_server_info
 )
 
-# Default headers
+
 DEFAULT_HEADERS = {
     "User-Agent": "API-Security-Scanner/1.0",
     "Accept": "application/json",
@@ -65,6 +65,32 @@ def discover_methods(url):
     return allowed
 
 
+def calculate_security_score(report):
+    """Generate security score out of 100"""
+
+    score = 100
+
+    # header issues
+    if report["header_issues"]:
+        score -= min(len(report["header_issues"]) * 10, 30)
+
+    # authentication risk
+    if report["authentication_issue"]:
+        if "without authentication" in report["authentication_issue"].lower():
+            score -= 25
+
+    # rate limit issue
+    if report["rate_limit_issue"]:
+        if "no rate limiting" in report["rate_limit_issue"].lower():
+            score -= 15
+
+    # bad status codes
+    if report["status_code"] >= 400:
+        score -= 20
+
+    return max(score, 0)
+
+
 def scan_api(input_text):
 
     url = validate_url(extract_url(input_text))
@@ -78,7 +104,8 @@ def scan_api(input_text):
         "header_issues": [],
         "authentication_issue": "",
         "rate_limit_issue": "",
-        "server_information": ""
+        "server_information": "",
+        "security_score": 100
     }
 
     try:
@@ -96,45 +123,44 @@ def scan_api(input_text):
 
         report["response_time_ms"] = round((end - start) * 1000, 2)
 
-        # numeric status
         report["status_code"] = response.status_code
 
-        # human readable message
         report["status_message"] = check_status_code(response)
 
-        # header checks
-        report["header_issues"] = check_headers(response)
+        report["header_issues"] = check_headers(response) or []
 
-        # authentication test
         report["authentication_issue"] = check_authentication(
             url, DEFAULT_HEADERS
-        )
+        ) or ""
 
-        # rate limit test
         report["rate_limit_issue"] = check_rate_limit(
             url, DEFAULT_HEADERS
-        )
+        ) or ""
 
-        # server info
-        report["server_information"] = check_server_info(response)
+        report["server_information"] = check_server_info(response) or ""
 
-        # method discovery
         report["allowed_methods"] = discover_methods(url)
+
+        # Calculate score
+        report["security_score"] = calculate_security_score(report)
 
     except requests.exceptions.Timeout:
 
         report["status_message"] = "Connection timed out"
         report["server_information"] = "Timeout while connecting"
+        report["security_score"] = 0
 
     except requests.exceptions.ConnectionError:
 
         report["status_message"] = "Connection failed"
         report["server_information"] = "Could not reach API server"
+        report["security_score"] = 0
 
     except requests.exceptions.RequestException as e:
 
         report["status_message"] = "Scan error"
         report["server_information"] = str(e)
+        report["security_score"] = 0
 
     return report
 
