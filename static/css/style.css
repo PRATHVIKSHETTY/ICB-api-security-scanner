@@ -497,3 +497,88 @@ border-radius:6px;
 .chat-close-btn:hover{
 background:rgba(255,255,255,0.08);
 }
+
+.security-checks{
+
+width:100%;
+max-width:720px;
+background:#0f1320;
+padding:20px;
+border-radius:14px;
+text-align:center;
+margin-bottom:20px;
+border:1px solid rgba(255,255,255,0.05);
+
+}
+
+.checks-title{
+font-size:14px;
+color:#aaa;
+margin-bottom:8px;
+}
+
+.checks-value{
+font-size:32px;
+font-weight:bold;
+color:#4caf50;
+}
+
+.checks-desc{
+font-size:12px;
+color:#aaa;
+margin-top:6px;
+}
+
+/* SECURITY TEST RESULTS TABLE */
+
+.test-table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+table-layout:fixed;
+}
+
+.test-table th{
+text-align:left;
+padding:14px 10px;
+font-size:16px;
+color:#bbb;
+border-bottom:1px solid #333;
+}
+
+.test-table td{
+padding:14px 10px;
+font-size:15px;
+border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+/* column widths */
+
+.test-table th:nth-child(1),
+.test-table td:nth-child(1){
+width:70%;
+}
+
+.test-table th:nth-child(2),
+.test-table td:nth-child(2){
+width:30%;
+text-align:right;
+}
+
+
+/* status colors */
+
+.test-pass{
+color:#4caf50;
+font-weight:600;
+}
+
+.test-fail{
+color:#f44336;
+font-weight:600;
+}
+
+.test-warning{
+color:#ff9800;
+font-weight:600;
+}

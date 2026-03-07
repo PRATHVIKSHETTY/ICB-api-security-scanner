@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Scan Result - API Security Scanner</title>
+
 <link rel="stylesheet" href="/static/css/style.css">
+
 </head>
 
 <body>
@@ -12,6 +15,7 @@
 <main class="main-content">
 
 <!-- HEADER -->
+
 <header class="result-header">
 
 <div class="result-title-section">
@@ -40,6 +44,7 @@ Download PDF Report
 
 
 <!-- SECURITY SCORE -->
+
 <div class="security-score-card">
 
 <div class="score-title">
@@ -51,13 +56,34 @@ Security Score
 </div>
 
 <div class="score-desc">
-Calculated based on authentication, headers, rate limiting and response behavior.
+Calculated based on authentication, headers, rate limiting, CORS and data exposure checks.
 </div>
 
 </div>
 
 
-<!-- SECURITY REPORT -->
+<!-- SECURITY CHECK COUNT -->
+
+<div class="security-checks">
+
+<div class="checks-title">
+Security Checks Passed
+</div>
+
+<div class="checks-value">
+{{ report.checks_passed }} / {{ report.total_checks }}
+</div>
+
+<div class="checks-desc">
+Number of security controls successfully detected.
+</div>
+
+</div>
+
+
+
+<!-- SECURITY OVERVIEW -->
+
 <section class="panel report-panel">
 
 <div class="results-header-row">
@@ -74,15 +100,19 @@ API Security Overview
 
 {% else %}
 <span class="status-badge status-vulnerable">Scan Error</span>
+
 {% endif %}
 
 </div>
 
 
+
 <div class="results-grid">
 
 <!-- Endpoint -->
+
 <div class="results-section">
+
 <h3>Endpoint & Status</h3>
 
 <p><strong>URL:</strong> {{ report.api_url }}</p>
@@ -91,97 +121,242 @@ API Security Overview
 <strong>Status:</strong>
 {{ report.status_code }} ({{ report.status_message }})
 </p>
+
 </div>
 
 
 <!-- Server -->
-{% if report.server_information %}
+
 <div class="results-section">
+
 <h3>Server Information</h3>
+
 <p>{{ report.server_information }}</p>
+
 </div>
-{% endif %}
 
 
 <!-- Headers -->
-{% if report.header_issues %}
+
 <div class="results-section">
 
 <h3>Header Issues</h3>
 
+{% if report.header_issues %}
+
 <ul>
+
 {% for issue in report.header_issues %}
 <li>{{ issue }}</li>
 {% endfor %}
+
 </ul>
 
-</div>
+{% else %}
+
+<p>No header issues detected</p>
+
 {% endif %}
+
+</div>
 
 
 <!-- Authentication -->
-{% if report.authentication_issue %}
+
 <div class="results-section">
 
 <h3>Authentication</h3>
+
 <p>{{ report.authentication_issue }}</p>
 
 </div>
-{% endif %}
 
 
-<!-- Rate limiting -->
-{% if report.rate_limit_issue %}
+<!-- Rate Limiting -->
+
 <div class="results-section">
 
 <h3>Rate Limiting</h3>
+
 <p>{{ report.rate_limit_issue }}</p>
 
 </div>
+
+
+<!-- CORS -->
+
+<div class="results-section">
+
+<h3>CORS Configuration</h3>
+
+{% if report.cors_issues %}
+
+<ul>
+
+{% for issue in report.cors_issues %}
+<li>{{ issue }}</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>No CORS issues detected</p>
+
 {% endif %}
 
+</div>
 
-<!-- Methods -->
-{% if report.allowed_methods %}
+
+<!-- Sensitive Data -->
+
+<div class="results-section">
+
+<h3>Sensitive Data Exposure</h3>
+
+{% if report.sensitive_data %}
+
+<ul>
+
+{% for issue in report.sensitive_data %}
+<li>{{ issue }}</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>No sensitive data exposure detected</p>
+
+{% endif %}
+
+</div>
+
+
+<!-- API Keys -->
+
+<div class="results-section">
+
+<h3>API Key Exposure</h3>
+
+{% if report.api_key_exposure %}
+
+<ul>
+
+{% for issue in report.api_key_exposure %}
+<li>{{ issue }}</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>No API key exposure detected</p>
+
+{% endif %}
+
+</div>
+
+
+<!-- HTTP Methods -->
+
 <div class="results-section">
 
 <h3>Allowed HTTP Methods</h3>
 
 <ul>
+
 {% for method in report.allowed_methods %}
 <li>{{ method }}</li>
+
 {% endfor %}
+
 </ul>
 
 </div>
-{% endif %}
 
 
-<!-- Response -->
-{% if report.response_time_ms %}
+<!-- Response Time -->
+
 <div class="results-section">
 
 <h3>Response Time</h3>
+
 <p>{{ report.response_time_ms }} ms</p>
 
 </div>
-{% endif %}
 
 </div>
+
+</section>
+
+
+
+<!-- TEST RESULTS -->
+
+<section class="panel">
+
+<h2 class="results-title">
+Security Test Results
+</h2>
+
+<table class="test-table">
+
+<tr>
+<th>Security Test</th>
+<th>Status</th>
+</tr>
+
+{% for test in report.test_results %}
+
+<tr>
+
+<td>{{ test.test }}</td>
+
+<td>
+
+{% if test.status == "Passed" %}
+
+<span class="test-pass">Passed</span>
+
+{% elif test.status == "Failed" %}
+
+<span class="test-fail">Failed</span>
+
+{% else %}
+
+<span class="test-warning">Warning</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
 
 </section>
 
 </main>
 
 
+
 <!-- CHAT PANEL -->
+
 <aside class="chat-panel" id="chatPanel">
 
 <div class="chat-header">
 
 <div class="chat-header-main">
 
-<div class="chat-title">Security Assistant</div>
+<div class="chat-title">
+Security Assistant
+</div>
 
 <div class="chat-subtitle">
 Discuss this scan’s findings and mitigations.
@@ -197,12 +372,14 @@ Discuss this scan’s findings and mitigations.
 <div class="chat-messages" id="chatMessages">
 
 <div class="message-row bot">
+
 <div class="message-bubble">
 
 Scan complete. Ask me to explain any header issue,
 authentication problem, or rate-limit finding in this report.
 
 </div>
+
 </div>
 
 </div>
@@ -227,10 +404,13 @@ onkeypress="handleKeyPress(event)"
 </aside>
 
 
-<!-- FLOATING BUTTON -->
+
+<!-- FLOATING CHAT BUTTON -->
+
 <button class="chat-toggle-btn" onclick="toggleChat()">
 💬
 </button>
+
 
 
 <script src="/static/js/chatbot.js"></script>
